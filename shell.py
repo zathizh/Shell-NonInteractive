@@ -54,12 +54,10 @@ def main():
                         s.send(os.getcwd()+ ">")
                 except socket.error, ex:
                     break
-                except KeyboardInterrupt, ex:
-                    sys.exit()
                 except Exception, ex:
                     continue
     except Exception, ex:
-        print(ex)
+        sys.exit()
 
 if __name__ == '__main__':
     main()
